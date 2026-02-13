@@ -1,0 +1,50 @@
+To install the
+python-docx module on Lubuntu 22, you primarily use the pip package manager for Python 3. The following steps will guide you through the process in the terminal: 
+1. Update package lists
+It's always good practice to update your local package lists before installing new software. Open your terminal and run:
+
+bash
+```
+sudo apt-get update
+```
+
+2. Ensure Python 3 and Pip are installed 
+Lubuntu 22 should have Python 3 pre-installed. Verify this and install python3-pip if you don't have it already: 
+
+bash
+```
+sudo apt-get install python3 python3-pip
+```
+
+You can verify the Python version with python3 --version. 
+3. Install the python-docx module 
+Use pip3 to install the package. It's recommended to install packages for your local user to avoid potential permission issues or conflicts with system packages: 
+
+bash
+```
+pip3 install python-docx --user
+```
+
+pip will automatically handle the installation of dependencies, such as lxml, which python-docx requires. 
+Alternatively, you can install it globally for all users using sudo: 
+
+bash
+```
+sudo pip3 install python-docx
+```
+
+Note: Using sudo with pip is generally discouraged unless necessary; the --user method is safer. 
+4. Verify the installation
+You can check if the module was installed correctly by running a simple Python command in your terminal: 
+
+bash
+```
+python3 -c "import docx; print(docx.__version__)"
+```
+
+If the command runs without an ModuleNotFoundError, the installation was successful. It may print the installed version number or, if not configured to print the version, simply complete without error. 
+5. Troubleshooting: ModuleNotFoundError
+If you encounter a ModuleNotFoundError after installation, it's likely that your Python interpreter isn't looking in the directory where pip installed the module. 
+
+    Check the installation path: You can find the installation location using pip show python-docx.
+    Use a virtual environment: To avoid path issues, consider using a virtual environment. This creates an isolated Python environment for your projects. You can learn more about managing environments in the official Python documentation. 
