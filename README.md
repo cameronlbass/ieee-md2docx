@@ -63,6 +63,19 @@ Concluding remarks.
 [1] A. Author, "Title," Journal, vol. 1, pp. 1-10, 2024.
 ```
 
+### Document Structure
+
+The parser expects this order:
+
+1. `# Title` (exactly one H1 heading)
+2. Zero or more author blocks (`**Name**` + `*affiliation lines*`)
+3. `## Abstract` (case-insensitive)
+4. `## Keywords` (optional, case-insensitive)
+5. Body sections (`## Heading`, `### Subheading`)
+6. `## References` (case-insensitive)
+
+Horizontal rules (`---`) are silently consumed everywhere and produce no output. Use them freely as visual separators in your source.
+
 ### Multiple Authors
 
 ```markdown
@@ -76,6 +89,8 @@ Concluding remarks.
 ```
 
 Authors are automatically arranged in equal-width columns (up to 4 per row).
+
+**Important:** Everything between `# Title` and `## Abstract` is the author block. Every `**bold**` line becomes an author name; every `*italic*` line becomes an affiliation line for the preceding author. If you have non-author bold text (e.g., a draft date), use italic instead: `*Draft -- February 2026*`.
 
 ## What's Supported
 
