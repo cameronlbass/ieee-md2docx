@@ -400,7 +400,9 @@ A blank line between references is fine (it terminates the multi-line join for t
 
 ## Horizontal Rules
 
-Lines consisting only of three or more hyphens (`---`) are silently skipped. You can use them as visual separators in your source without affecting output.
+Lines consisting only of three or more hyphens (`---`) are silently consumed everywhere. Use them freely as visual separators in your markdown source; they produce no output.
+
+**Important:** The author block runs from `# Title` until `## Abstract` (case-insensitive). Every `**bold**` line in that range becomes an author name. If you have non-author bold text (e.g., a draft date or subtitle), use italic instead: `*Draft -- February 2026*` makes it an affiliation line under the preceding author. Alternatively, move it outside the author block.
 
 ---
 

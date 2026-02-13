@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-IEEE Markdown to DOCX Converter v6
+IEEE Markdown to DOCX Converter v7
 
 Converts a markdown file to IEEE conference two-column format.
 Double-click or run from command line. Prompts for file path if none given.
@@ -110,12 +110,8 @@ def parse_markdown(filepath):
         trimmed = line.strip()
         i += 1
 
-        # Skip horizontal rules
-        if re.match(r"^---+$", trimmed):
-            continue
-
         # References
-        if re.match(r"^## References", trimmed) or trimmed == "REFERENCES":
+        if re.match(r"^##\s+References", trimmed, re.IGNORECASE) or trimmed == "REFERENCES":
             in_references = True
             current_section = None
             continue
@@ -139,7 +135,13 @@ def parse_markdown(filepath):
 
         # Author/affiliation after title
         # Each **Name** starts a new author; *italic* lines are affiliation info
+        # This block continues until ## Abstract (case-insensitive) is reached.
+        # Horizontal rules (---) and blank lines are ignored here.
         if state == "post_title":
+            if re.match(r"^---+$", trimmed):
+                continue
+            if trimmed == "":
+                continue
             bold_match = re.match(r"^\*\*(.+?)\*\*\s*$", trimmed)
             if bold_match:
                 result["authors"].append({
@@ -153,17 +155,16 @@ def parse_markdown(filepath):
                     italic_match.group(1).strip()
                 )
                 continue
-            if trimmed == "":
-                continue
+            # Non-matching lines: fall through to abstract/heading checks below
 
-        # Abstract
-        if re.match(r"^## Abstract", trimmed):
+        # Abstract (case-insensitive)
+        if re.match(r"^##\s+Abstract", trimmed, re.IGNORECASE):
             state = "abstract"
             current_section = None
             continue
 
         if state == "abstract":
-            if trimmed == "":
+            if trimmed == "" or re.match(r"^---+$", trimmed):
                 continue
             if re.match(r"^##\s", trimmed):
                 state = "body"
@@ -173,13 +174,13 @@ def parse_markdown(filepath):
                 continue
 
         # Keywords
-        if re.match(r"^## Keywords", trimmed):
+        if re.match(r"^##\s+Keywords", trimmed, re.IGNORECASE):
             state = "keywords"
             current_section = None
             continue
 
         if state == "keywords":
-            if trimmed == "":
+            if trimmed == "" or re.match(r"^---+$", trimmed):
                 continue
             if re.match(r"^##\s", trimmed):
                 state = "body"
@@ -187,6 +188,10 @@ def parse_markdown(filepath):
             else:
                 result["keywords"] = strip_markdown(trimmed)
                 continue
+
+        # Skip horizontal rules in body (visual separators, no output)
+        if re.match(r"^---+$", trimmed):
+            continue
 
         # H2 section heading
         if re.match(r"^## ", trimmed):
