@@ -910,11 +910,17 @@ def build_document(parsed):
     equation_counter = 0
     for sec in parsed["sections"]:
         if sec["level"] == 1:
-            # Extract existing number or generate
+            # Strip existing number prefix (Arabic or Roman) if present
             heading = sec["heading"]
             num_match = re.match(r"^(\d+)\.\s*(.*)", heading)
+            roman_match = re.match(
+                r"^(M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))\.\s*(.*)",
+                heading, re.IGNORECASE,
+            )
             if num_match:
                 display = to_roman(int(num_match.group(1))) + ". " + num_match.group(2)
+            elif roman_match and roman_match.group(1):
+                display = to_roman(sec["number"]) + ". " + roman_match.group(2)
             else:
                 display = to_roman(sec["number"]) + ". " + heading
 
@@ -928,8 +934,11 @@ def build_document(parsed):
         elif sec["level"] == 2:
             heading = sec["heading"]
             num_match = re.match(r"^(\d+\.\d+)\s*(.*)", heading)
+            letter_match = re.match(r"^([A-Z])\.\s*(.*)", heading)
             if num_match:
                 display = to_letter(sec["number"]) + ". " + num_match[2]
+            elif letter_match:
+                display = to_letter(sec["number"]) + ". " + letter_match.group(2)
             else:
                 display = to_letter(sec["number"]) + ". " + heading
 
