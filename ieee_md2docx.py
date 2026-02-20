@@ -512,7 +512,7 @@ def parse_math_text(text, size=BODY_PT, bold=False, italic=False, font=FONT):
 
 def make_paragraph(runs, align="justify", space_before=0, space_after=80,
                    first_indent=None, left_indent=None, hanging=None,
-                   keep_next=False, line_spacing=None, line_rule="auto",
+                   keep_next=False, line_spacing=228, line_rule="auto",
                    tab_stops=None):
     """Create a paragraph element with formatting."""
     p = OxmlElement("w:p")
@@ -910,19 +910,10 @@ def build_document(parsed):
     equation_counter = 0
     for sec in parsed["sections"]:
         if sec["level"] == 1:
-            # Strip existing number prefix (Arabic or Roman) if present
             heading = sec["heading"]
-            num_match = re.match(r"^(\d+)\.\s*(.*)", heading)
-            roman_match = re.match(
-                r"^(M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))\.\s*(.*)",
-                heading, re.IGNORECASE,
-            )
-            if num_match:
-                display = to_roman(int(num_match.group(1))) + ". " + num_match.group(2)
-            elif roman_match and roman_match.group(1):
-                display = to_roman(sec["number"]) + ". " + roman_match.group(2)
-            else:
-                display = to_roman(sec["number"]) + ". " + heading
+            # Strip any existing numbering prefix (Arabic, Roman, etc.)
+            heading = re.sub(r"^[A-Za-z0-9]+\.\s*", "", heading)
+            display = to_roman(sec["number"]) + ". " + heading
 
             # IEEE template: mixed case + small caps style (NOT .upper())
             body.append(make_paragraph(
@@ -933,14 +924,8 @@ def build_document(parsed):
 
         elif sec["level"] == 2:
             heading = sec["heading"]
-            num_match = re.match(r"^(\d+\.\d+)\s*(.*)", heading)
-            letter_match = re.match(r"^([A-Z])\.\s*(.*)", heading)
-            if num_match:
-                display = to_letter(sec["number"]) + ". " + num_match[2]
-            elif letter_match:
-                display = to_letter(sec["number"]) + ". " + letter_match.group(2)
-            else:
-                display = to_letter(sec["number"]) + ". " + heading
+            heading = re.sub(r"^[A-Za-z0-9]+\.\s*", "", heading)
+            display = to_letter(sec["number"]) + ". " + heading
 
             body.append(make_paragraph(
                 make_run(display, size=H2_PT, italic=True),
