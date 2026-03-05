@@ -777,7 +777,7 @@ def set_final_section_two_col(doc):
     body.append(sectPr)
 
 
-def build_document(parsed):
+def build_document(parsed, single_col=False):
     """Build the IEEE-formatted DOCX from parsed markdown."""
     doc = Document()
 
@@ -893,7 +893,8 @@ def build_document(parsed):
 
     # Inject continuous section break BEFORE abstract paragraph
     # This ends the author section (single or multi-col) and starts two-column body
-    inject_continuous_two_col_section_break(body, abstract_para)
+    if not single_col:
+        inject_continuous_two_col_section_break(body, abstract_para)
 
     # Keywords
     if parsed["keywords"]:
@@ -1069,7 +1070,8 @@ def build_document(parsed):
         ))
 
     # Set the final document section to two-column
-    set_final_section_two_col(doc)
+    if not single_col:
+        set_final_section_two_col(doc)
 
     return doc
 
@@ -1079,9 +1081,16 @@ def build_document(parsed):
 # ============================================================================
 
 def main():
+    # Parse flags
+    args = sys.argv[1:]
+    single_col = False
+    if "--single" in args:
+        single_col = True
+        args.remove("--single")
+
     # Get input file path
-    if len(sys.argv) > 1:
-        input_path = sys.argv[1]
+    if args:
+        input_path = args[0]
     else:
         input_path = input("Enter path to markdown file: ").strip().strip('"').strip("'")
 
@@ -1095,7 +1104,8 @@ def main():
         print(f"Warning: Expected .md file, got {input_path.suffix}")
 
     # Output path: same directory, same stem, _IEEE.docx
-    output_path = input_path.with_name(input_path.stem + "_IEEE.docx")
+    suffix = "_single.docx" if single_col else "_IEEE.docx"
+    output_path = input_path.with_name(input_path.stem + suffix)
 
     print(f"Input:  {input_path}")
     print(f"Output: {output_path}")
@@ -1114,15 +1124,16 @@ def main():
     print()
 
     # Build
-    print("Building IEEE document...")
-    doc = build_document(parsed)
+    mode = "single-column" if single_col else "IEEE two-column"
+    print(f"Building {mode} document...")
+    doc = build_document(parsed, single_col=single_col)
 
     # Save
     doc.save(str(output_path))
     print(f"Saved: {output_path}")
 
     # Pause if double-clicked (no args)
-    if len(sys.argv) <= 1:
+    if not args:
         input("\nPress Enter to exit...")
 
 
